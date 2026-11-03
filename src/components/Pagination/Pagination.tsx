@@ -10,7 +10,7 @@ const ReactPaginate =
   (
     ReactPaginateModule as unknown as
       ModuleWithDefault<ComponentType<ReactPaginateProps>>
-  ).default ?? (ReactPaginateModule as unknown as ComponentType<ReactPaginateProps>);
+  ).default;
 
 interface PaginationProps {
   currentPage: number;
