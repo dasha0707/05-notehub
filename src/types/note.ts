@@ -5,8 +5,8 @@ export interface Note {
   title: string;
   content: string;
   tag: NoteTag;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface NewNote {

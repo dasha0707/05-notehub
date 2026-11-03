@@ -1,12 +1,15 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
+import toast from 'react-hot-toast';
 import * as Yup from 'yup';
+
+import { createNote } from '../../services/noteService';
 import type { NewNote } from '../../types/note';
 import css from './NoteForm.module.css';
 
 interface NoteFormProps {
-  onSubmit: (values: NewNote) => Promise<void>;
   onCancel: () => void;
-  isSubmitting: boolean;
+  onCreated: () => void;
 }
 
 const initialValues: NewNote = {
@@ -27,32 +30,41 @@ const validationSchema = Yup.object({
     .required('Tag is required'),
 });
 
-export default function NoteForm({ onSubmit, onCancel, isSubmitting }: NoteFormProps) {
+export default function NoteForm({ onCancel, onCreated }: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['notes'] });
+      toast.success('Note created!');
+      onCreated();
+    },
+    onError: () => {
+      toast.error('Could not create the note.');
+    },
+  });
+
   return (
     <Formik<NewNote>
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={async (values, helpers) => {
         try {
-          await onSubmit({ ...values, title: values.title.trim() });
+          await createMutation.mutateAsync({ ...values, title: values.title.trim() });
           helpers.resetForm();
         } catch {
-          // The mutation displays a toast; allow the user to retry.
+          // The mutation reports the error; leave values so the user can retry.
         } finally {
           helpers.setSubmitting(false);
         }
       }}
     >
-      {({ isSubmitting: isFormikSubmitting }) => (
+      {({ isSubmitting }) => (
         <Form className={css.form}>
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
-            <Field
-              id="title"
-              type="text"
-              name="title"
-              className={css.input}
-            />
+            <Field id="title" type="text" name="title" className={css.input} />
             <ErrorMessage name="title" component="span" className={css.error} />
           </div>
 
@@ -91,9 +103,9 @@ export default function NoteForm({ onSubmit, onCancel, isSubmitting }: NoteFormP
             <button
               type="submit"
               className={css.submitButton}
-              disabled={isSubmitting || isFormikSubmitting}
+              disabled={createMutation.isPending || isSubmitting}
             >
-              {isSubmitting || isFormikSubmitting ? 'Creating...' : 'Create note'}
+              {createMutation.isPending || isSubmitting ? 'Creating...' : 'Create note'}
             </button>
           </div>
         </Form>

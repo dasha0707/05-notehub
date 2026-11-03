@@ -1,13 +1,31 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
+
+import { deleteNote } from '../../services/noteService';
 import type { Note } from '../../types/note';
 import css from './NoteList.module.css';
 
 interface NoteListProps {
   notes: Note[];
-  onDelete: (id: string) => void;
-  deletingId: string | null;
+  onDeletedLast?: () => void;
 }
 
-export default function NoteList({ notes, onDelete, deletingId }: NoteListProps) {
+export default function NoteList({ notes, onDeletedLast }: NoteListProps) {
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: async () => {
+      if (notes.length === 1) {
+        onDeletedLast?.();
+      }
+      await queryClient.invalidateQueries({ queryKey: ['notes'] });
+      toast.success('Note deleted!');
+    },
+    onError: () => {
+      toast.error('Could not delete the note.');
+    },
+  });
+
   return (
     <ul className={css.list}>
       {notes.map((note) => (
@@ -19,10 +37,12 @@ export default function NoteList({ notes, onDelete, deletingId }: NoteListProps)
             <button
               className={css.button}
               type="button"
-              disabled={deletingId !== null}
-              onClick={() => onDelete(note.id)}
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate(note.id)}
             >
-              {deletingId === note.id ? 'Deleting...' : 'Delete'}
+              {deleteMutation.isPending && deleteMutation.variables === note.id
+                ? 'Deleting...'
+                : 'Delete'}
             </button>
           </div>
         </li>

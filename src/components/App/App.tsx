@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
-import { createNote, deleteNote, fetchNotes } from '../../services/noteService';
-import type { NewNote } from '../../types/note';
+import { fetchNotes } from '../../services/noteService';
 import Modal from '../Modal/Modal';
 import NoteForm from '../NoteForm/NoteForm';
 import NoteList from '../NoteList/NoteList';
@@ -15,12 +14,10 @@ import css from './App.module.css';
 const PER_PAGE = 12;
 
 export default function App() {
-  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const updateSearch = useDebouncedCallback((value: string) => {
     setPage(1);
@@ -33,42 +30,20 @@ export default function App() {
     placeholderData: keepPreviousData,
   });
 
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: async () => {
-      setPage(1);
-      await queryClient.invalidateQueries({ queryKey: ['notes'] });
-      toast.success('Note created!');
-    },
-    onError: () => toast.error('Could not create the note.'),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: async () => {
-      if (data?.notes.length === 1 && page > 1) {
-        setPage(page - 1);
-      }
-      await queryClient.invalidateQueries({ queryKey: ['notes'] });
-      toast.success('Note deleted!');
-    },
-    onError: () => toast.error('Could not delete the note.'),
-    onSettled: () => setDeletingId(null),
-  });
-
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
     updateSearch(value);
   };
 
-  const handleCreateNote = async (values: NewNote) => {
-    await createMutation.mutateAsync(values);
+  const handleCreated = () => {
+    setPage(1);
     setIsModalOpen(false);
   };
 
-  const handleDeleteNote = (id: string) => {
-    setDeletingId(id);
-    deleteMutation.mutate(id);
+  const handleDeletedLast = () => {
+    if (page > 1) {
+      setPage((previousPage) => previousPage - 1);
+    }
   };
 
   return (
@@ -101,11 +76,7 @@ export default function App() {
           </p>
         )}
         {data && data.notes.length > 0 && (
-          <NoteList
-            notes={data.notes}
-            onDelete={handleDeleteNote}
-            deletingId={deletingId}
-          />
+          <NoteList notes={data.notes} onDeletedLast={handleDeletedLast} />
         )}
         {data && data.notes.length === 0 && (
           <p className={css.message}>No notes found.</p>
@@ -118,9 +89,8 @@ export default function App() {
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
           <NoteForm
-            onSubmit={handleCreateNote}
             onCancel={() => setIsModalOpen(false)}
-            isSubmitting={createMutation.isPending}
+            onCreated={handleCreated}
           />
         </Modal>
       )}
