@@ -1,0 +1,1 @@
+{"root":["./src/main.tsx","./src/vite-env.d.ts","./src/components/app/app.tsx","./src/components/modal/modal.tsx","./src/components/noteform/noteform.tsx","./src/components/notelist/notelist.tsx","./src/components/pagination/pagination.tsx","./src/components/searchbox/searchbox.tsx","./src/services/noteservice.ts","./src/types/note.ts","./vite.config.ts"],"version":"5.9.3"}

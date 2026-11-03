@@ -1,0 +1,8 @@
+.app { min-height: 100vh; max-width: 1320px; margin: 0 auto; padding: 24px 22px 56px; }
+.toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; background: #e7f5fa; border: 1px solid #ccecf4; padding: 14px 18px; border-radius: 10px; margin-bottom: 26px; }
+.createButton { margin-left: auto; background: #3198c5; border: none; color: white; border-radius: 5px; padding: 10px 18px; font-weight: 600; white-space: nowrap; }
+.createButton:hover { background: #267fa7; }
+.message { text-align: center; color: #667085; font-size: 16px; padding: 44px 8px; }
+.error { text-align: center; color: #b42318; background: #fff1f0; border-radius: 8px; padding: 18px; overflow-wrap: anywhere; }
+.updating { display: block; margin-top: 12px; font-size: 12px; color: #667085; text-align: center; }
+@media (max-width: 600px) { .app { padding: 12px; } .toolbar { padding: 12px; } .createButton { width: 100%; margin-left: 0; } }

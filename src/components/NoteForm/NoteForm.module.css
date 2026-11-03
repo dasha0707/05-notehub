@@ -1,0 +1,12 @@
+.form { display: flex; flex-direction: column; gap: 18px; }
+.formGroup { display: flex; flex-direction: column; gap: 7px; }
+.formGroup label { font-size: 14px; font-weight: 600; }
+.input, .textarea, .select { background: #fff; width: 100%; min-width: 0; border: 1px solid #ccd5df; border-radius: 6px; padding: 10px 12px; color: #23334d; outline-offset: 2px; }
+.input:focus, .textarea:focus, .select:focus { outline: 2px solid #86c8e2; border-color: #4c9dbc; }
+.textarea { resize: vertical; }
+.error { min-height: 12px; color: #b42318; font-size: 12px; }
+.actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 3px; }
+.cancelButton, .submitButton { border: none; border-radius: 5px; padding: 10px 14px; font-weight: 600; }
+.cancelButton { background: #e8edf3; color: #35465e; }
+.submitButton { background: #3198c5; color: white; }
+.submitButton:hover { background: #267fa7; }
